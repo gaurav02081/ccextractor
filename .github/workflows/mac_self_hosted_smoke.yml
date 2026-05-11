@@ -1,0 +1,35 @@
+name: Mac self-hosted runner smoke test
+
+# Smoke test for the GSoC WP7 Mac runner setup.
+# Verifies the registered self-hosted macOS runner picks up jobs and that
+# CCExtractor builds + reports a version on it.
+#
+# Manual trigger only (workflow_dispatch) — won't fire on every push, since
+# this is intended as a one-off verification, not ongoing CI.
+#
+# Companion scaffolding lives in the sample-platform repo at
+# install/ci-vm/ci-mac/. This workflow should be removed once the full
+# WP7 workflow lands in Week 11.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: [self-hosted, macOS, ARM64]
+    steps:
+      - name: Show runner info
+        run: |
+          echo "Hostname: $(hostname)"
+          echo "Arch:     $(uname -m)"
+          echo "macOS:    $(sw_vers -productVersion)"
+
+      - uses: actions/checkout@v4
+
+      - name: Build CCExtractor (baseline)
+        working-directory: ./mac
+        run: ./build.command
+
+      - name: Verify binary
+        working-directory: ./mac
+        run: ./ccextractor --version
